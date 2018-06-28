@@ -28,10 +28,88 @@ docs = [
     'test/vasileios  sakkas.docx'
 ]
 
-for doc in docs:
-    text = textract.process(doc).decode('utf-8')
+phone_regex_plus = r"\+[0-9]{1,}"
+phone_regex = r"[0-9]{5,}"
+phone_regex_parenthesis = r"\([0-9]+\)"
+
+
+def get_email(text):
     matches = re.findall(email_re, text, re.MULTILINE)
     if matches:
-        print(matches[0])
+        return matches[0]
     else:
-        print("no email detected")
+        return("no email detected")
+
+
+def get_phone(text):
+    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    matches = re.findall(phone_regex_plus, text, re.MULTILINE)
+    if matches:
+        if len(matches[0]) > 9:
+            return matches[0]
+        else:
+            matches_sec = re.finditer(phone_regex_plus, text, re.MULTILINE)
+            rest_number = ''
+            if matches_sec:
+                match = [m.end(0) for m in matches_sec]
+                index = match[0]
+                while(1):
+                    if text[index] != ' ' and text[index] in numbers:
+                        rest_number += text[index]
+                        index += 1
+                    elif text[index] == ' ' or text[index] == '(' or text[index] == ')' or text[index] == '.' or text[index] == '-':
+                        index += 1
+                    else:
+                        break
+                return(matches[0]+rest_number)
+    else:
+        matches = re.findall(phone_regex_parenthesis, text, re.MULTILINE)
+        if matches:
+            matches_sec = re.finditer(
+                phone_regex_parenthesis, text, re.MULTILINE)
+            rest_number = ''
+            if matches_sec:
+                match = [m.end(0) for m in matches_sec]
+                index = match[0]
+                while(1):
+                    if text[index] != ' ' and text[index] in numbers:
+                        rest_number += text[index]
+                        index += 1
+                    elif text[index] == ' ' or text[index] == '(' or text[index] == ')' or text[index] == '.' or text[index] == '-':
+                        index += 1
+                    else:
+                        break
+                return(matches[0].strip('\(\)')+rest_number)
+        else:
+            matches = re.findall(phone_regex, text, re.MULTILINE)
+            if matches:
+                if len(matches[0]) > 9:
+                    return matches[0]
+                else:
+                    matches_sec = re.finditer(phone_regex, text, re.MULTILINE)
+                    rest_number = ''
+                    if matches_sec:
+                        match = [m.end(0) for m in matches_sec]
+                        index = match[0]
+                        while(1):
+                            if text[index] != ' ' and text[index] in numbers:
+                                rest_number += text[index]
+                                index += 1
+                            elif text[index] == ' ' or text[index] == '(' or text[index] == ')' or text[index] == '.' or text[index] == '-':
+                                index += 1
+                            else:
+                                break
+                        if len(matches[0]+rest_number) > 5:
+                            return(matches[0]+rest_number)
+                        else:
+                            return(matches[1])
+            else:
+                return("no phone detected")
+
+
+for doc in docs:
+    text = textract.process(doc).decode('utf-8')
+    print(doc)
+    print (get_email(text))
+    print (get_phone(text))
+    print("==============")
