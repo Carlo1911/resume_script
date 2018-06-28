@@ -1,5 +1,6 @@
 import re
 import textract
+import json
 
 email_re = r"[\w\.-]+@[\w\.-]+\.\w+"
 
@@ -107,9 +108,19 @@ def get_phone(text):
                 return("no phone detected")
 
 
+data = {}
+cvs = []
 for doc in docs:
+    cv = {}
     text = textract.process(doc).decode('utf-8')
+    cv['file'] = doc
     print(doc)
-    print (get_email(text))
-    print (get_phone(text))
+    cv['email'] = get_email(text)
+    print (cv['email'])
+    cv['phone'] = get_phone(text)
+    print (cv['phone'])
     print("==============")
+    cvs.append(cv)
+data['data'] = cvs
+with open('data.json', 'w') as f:
+    json.dump(data, f, ensure_ascii=False)
