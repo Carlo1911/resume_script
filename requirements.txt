@@ -1,1 +1,3 @@
 textract
+spacy
+nltk

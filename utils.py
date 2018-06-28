@@ -1,6 +1,8 @@
-import re
-import textract
 import json
+import re
+import spacy
+import textract
+from nltk.corpus import words
 
 email_re = r"[\w\.-]+@[\w\.-]+\.\w+"
 
@@ -24,7 +26,6 @@ docs = [
     'test/Jaap Gerretse.pdf',
     'test/Jose Daniel Andino Pereira.docx',
     'test/Piotr Lemanski.docx',
-    'test/primary%3ADownload%2FEngin Kılıç.pdf',
     'test/Stefanie Haanfler.pdf',
     'test/vasileios  sakkas.docx'
 ]
@@ -33,6 +34,12 @@ phone_regex_plus = r"\+[0-9]{1,}"
 phone_regex = r"[0-9]{5,}"
 phone_regex_parenthesis = r"\([0-9]+\)"
 
+def get_name(text):
+    nlp = spacy.load('en_core_web_lg')
+    doc = nlp(text)
+    for ent in doc.ents:
+        if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and '/n' not in ent.text):
+            return ent.text
 
 def get_email(text):
     matches = re.findall(email_re, text, re.MULTILINE)
@@ -115,10 +122,12 @@ for doc in docs:
     text = textract.process(doc).decode('utf-8')
     cv['file'] = doc
     print(doc)
+    cv['name'] = get_name(text)
+    # print(cv['name'])
     cv['email'] = get_email(text)
-    print (cv['email'])
+    # print (cv['email'])
     cv['phone'] = get_phone(text)
-    print (cv['phone'])
+    # print (cv['phone'])
     print("==============")
     cvs.append(cv)
 data['data'] = cvs
