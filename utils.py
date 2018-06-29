@@ -1,10 +1,10 @@
 import json
-import re
+# import re
+import regex as re
 import spacy
 import textract
 from nltk.corpus import words
 
-email_re = r"[\w\.-]+@[\w\.-]+\.\w+"
 
 docs = [
     'test/Adrien CHOROT.docx',
@@ -30,16 +30,42 @@ docs = [
     'test/vasileios  sakkas.docx'
 ]
 
+email_re = r"[\w\.-]+@[\w\.-]+\.\w+"
 phone_regex_plus = r"\+[0-9]{1,}"
 phone_regex = r"[0-9]{5,}"
 phone_regex_parenthesis = r"\([0-9]+\)"
+name_re = r"name: [\w\.-]+[\w\.-]"
+
 
 def get_name(text):
-    nlp = spacy.load('en_core_web_lg')
-    doc = nlp(text)
-    for ent in doc.ents:
-        if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and '/n' not in ent.text):
-            return ent.text
+    matches = re.findall(name_re, text.lower(), re.MULTILINE)
+    if matches:
+        print(len(matches))
+        matches_sec = re.finditer(name_re, text.lower(), re.MULTILINE)
+        full_name = ''
+        if matches_sec:
+            match = [m.end(0) for m in matches_sec]
+            for i in range(len(match)):
+                rest_name = ''
+                index = match[i]
+                while(1):
+                    if text[index] != ' ' and re.match(r'\p{L}', text[index]):
+                        rest_name += text[index]
+                        index += 1
+                    elif text[index] == ' ' or text[index] == '\t':
+                        rest_name += ' '
+                        index += 1
+                    else:
+                        break
+                full_name += ' '+matches[i][6:]+rest_name
+            return full_name[1:]
+    else:
+        nlp = spacy.load('en_core_web_lg')
+        doc = nlp(text)
+        for ent in doc.ents:
+            if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and '/n' not in ent.text):
+                return ent.text.strip()
+
 
 def get_email(text):
     matches = re.findall(email_re, text, re.MULTILINE)
@@ -114,6 +140,7 @@ def get_phone(text):
             else:
                 return("no phone detected")
 
+
 def get_location(text):
     nlp = spacy.load('en_core_web_lg')
     doc = nlp(text)
@@ -121,12 +148,13 @@ def get_location(text):
         if(ent.label_ == 'GPE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
 
-#def get_language(text):
+# def get_language(text):
 #    nlp = spacy.load('en_core_web_lg')
 #    doc = nlp(text)
 #    for ent in doc.ents:
 #        if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
 #            return ent.text
+
 
 data = {}
 cvs = []
@@ -134,17 +162,17 @@ for doc in docs:
     cv = {}
     text = textract.process(doc).decode('utf-8')
     cv['file'] = doc
-    #print(doc)
+    print(doc)
     cv['name'] = get_name(text)
-    #print(cv['name'])
+    print(cv['name'])
     cv['email'] = get_email(text)
-    #print (cv['email'])
+    print (cv['email'])
     cv['phone'] = get_phone(text)
-    #print (cv['phone'])
+    print (cv['phone'])
     cv['location'] = get_location(text)
-    #print (cv['location'])
-    cv['language'] = get_language(text)
-    #print (cv['language'])
+    print (cv['location'])
+    # cv['language'] = get_language(text)
+    # print (cv['language'])
     print("==============")
     cvs.append(cv)
 data['data'] = cvs
