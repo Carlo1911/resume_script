@@ -114,6 +114,19 @@ def get_phone(text):
             else:
                 return("no phone detected")
 
+def get_location(text):
+    nlp = spacy.load('en_core_web_lg')
+    doc = nlp(text)
+    for ent in doc.ents:
+        if(ent.label_ == 'GPE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
+            return ent.text
+
+#def get_language(text):
+#    nlp = spacy.load('en_core_web_lg')
+#    doc = nlp(text)
+#    for ent in doc.ents:
+#        if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
+#            return ent.text
 
 data = {}
 cvs = []
@@ -121,13 +134,17 @@ for doc in docs:
     cv = {}
     text = textract.process(doc).decode('utf-8')
     cv['file'] = doc
-    print(doc)
+    #print(doc)
     cv['name'] = get_name(text)
-    # print(cv['name'])
+    #print(cv['name'])
     cv['email'] = get_email(text)
-    # print (cv['email'])
+    #print (cv['email'])
     cv['phone'] = get_phone(text)
-    # print (cv['phone'])
+    #print (cv['phone'])
+    cv['location'] = get_location(text)
+    #print (cv['location'])
+    cv['language'] = get_language(text)
+    #print (cv['language'])
     print("==============")
     cvs.append(cv)
 data['data'] = cvs
