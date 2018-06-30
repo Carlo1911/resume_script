@@ -1,5 +1,4 @@
 import json
-# import re
 import regex as re
 import spacy
 import textract
@@ -35,12 +34,20 @@ phone_regex_plus = r"\+[0-9]{1,}"
 phone_regex = r"[0-9]{5,}"
 phone_regex_parenthesis = r"\([0-9]+\)"
 name_re = r"name: [\w\.-]+[\w\.-]"
+skills_re = r"skills+\n"
+titles = ['career', 'language', 'experience', 'employment']
+
+
+def find_word_in_sentence(words, sentence):
+    for word in words:
+        if word in sentence:
+            return True, word
+    return False, ''
 
 
 def get_name(text):
     matches = re.findall(name_re, text.lower(), re.MULTILINE)
     if matches:
-        print(len(matches))
         matches_sec = re.finditer(name_re, text.lower(), re.MULTILINE)
         full_name = ''
         if matches_sec:
@@ -61,10 +68,13 @@ def get_name(text):
             return full_name[1:]
     else:
         nlp = spacy.load('en_core_web_lg')
-        doc = nlp(text)
+        doc = nlp(text.replace('\n\n', '\n'))
         for ent in doc.ents:
-            if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and '/n' not in ent.text):
-                return ent.text.strip()
+            if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and re.match(r'\p{L}', ent.text.strip())):
+                if '\n' in ent.text:
+                    return ent.text.strip().split('\n')[0]
+                else:
+                    return ent.text.strip()
 
 
 def get_email(text):
@@ -148,12 +158,49 @@ def get_location(text):
         if(ent.label_ == 'GPE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
 
-# def get_language(text):
-#    nlp = spacy.load('en_core_web_lg')
-#    doc = nlp(text)
-#    for ent in doc.ents:
-#        if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
-#            return ent.text
+
+def get_language(text):
+    nlp = spacy.load('en_core_web_lg')
+    doc = nlp(text)
+    for ent in doc.ents:
+        if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
+            return ent.text
+
+
+def get_skills(text):
+    matches = re.findall(skills_re, text.lower(), re.MULTILINE)
+    if matches:
+        matches_sec = re.finditer(skills_re, text.lower(), re.MULTILINE)
+        rest_name = ''
+        if matches_sec:
+            match = [m.end(0) for m in matches_sec]
+            index = match[0]
+            skill_index = match[0]
+            print(match)
+            while(index < len(text)):
+                rest_name += text[index]
+                index += 1
+
+            sentences = rest_name.split('\n')
+            for sentence in sentences:
+                if len(sentence) > 4:
+                    find_it, title = find_word_in_sentence(
+                        titles, sentence.lower())
+                    if find_it:
+                        matches_sec = re.finditer(
+                            skills_re, text.lower(), re.MULTILINE)
+                        if matches_sec:
+                            match = [m.start(0) for m in matches_sec]
+                            other_index = match[0]
+                            for i in range(len(match)):
+                                if match[i] > skill_index:
+                                    other_index = match[i]
+                            skill_resume = ''
+                            while(skill_index < other_index):
+                                skill_resume += text[skill_index]
+                                skill_index += 1
+                            rest_name = skill_resume
+            return rest_name
 
 
 data = {}
@@ -164,15 +211,11 @@ for doc in docs:
     cv['file'] = doc
     print(doc)
     cv['name'] = get_name(text)
-    print(cv['name'])
     cv['email'] = get_email(text)
-    print (cv['email'])
     cv['phone'] = get_phone(text)
-    print (cv['phone'])
     cv['location'] = get_location(text)
-    print (cv['location'])
-    # cv['language'] = get_language(text)
-    # print (cv['language'])
+    cv['language'] = get_language(text)
+    cv['skills'] = get_skills(text)
     print("==============")
     cvs.append(cv)
 data['data'] = cvs
