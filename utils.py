@@ -35,7 +35,9 @@ phone_regex = r"[0-9]{5,}"
 phone_regex_parenthesis = r"\([0-9]+\)"
 name_re = r"name: [\w\.-]+[\w\.-]"
 skills_re = r"skills+\n"
-titles = ['career', 'language', 'experience', 'employment']
+experience_re = r"(experience|employment|career)+\n"
+titles_skilss = ['career', 'language', 'experience', 'employment']
+titles_experience = ['skills', 'language']
 
 
 def find_word_in_sentence(words, sentence):
@@ -45,7 +47,7 @@ def find_word_in_sentence(words, sentence):
     return False, ''
 
 
-def get_name(text):
+def get_name(text, nlp):
     matches = re.findall(name_re, text.lower(), re.MULTILINE)
     if matches:
         matches_sec = re.finditer(name_re, text.lower(), re.MULTILINE)
@@ -67,7 +69,6 @@ def get_name(text):
                 full_name += ' '+matches[i][6:]+rest_name
             return full_name[1:]
     else:
-        nlp = spacy.load('en_core_web_lg')
         doc = nlp(text.replace('\n\n', '\n'))
         for ent in doc.ents:
             if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and re.match(r'\p{L}', ent.text.strip())):
@@ -151,20 +152,18 @@ def get_phone(text):
                 return("no phone detected")
 
 
-def get_location(text):
-    nlp = spacy.load('en_core_web_lg')
-    doc = nlp(text)
+def get_location(text, doc):
     for ent in doc.ents:
         if(ent.label_ == 'GPE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
+    return("no location detected")
 
 
-def get_language(text):
-    nlp = spacy.load('en_core_web_lg')
-    doc = nlp(text)
+def get_language(text, doc):
     for ent in doc.ents:
         if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
+    return("no location detected")
 
 
 def get_skills(text):
@@ -176,16 +175,14 @@ def get_skills(text):
             match = [m.end(0) for m in matches_sec]
             index = match[0]
             skill_index = match[0]
-            print(match)
             while(index < len(text)):
                 rest_name += text[index]
                 index += 1
-
             sentences = rest_name.split('\n')
             for sentence in sentences:
                 if len(sentence) > 4:
                     find_it, title = find_word_in_sentence(
-                        titles, sentence.lower())
+                        titles_skilss, sentence.lower())
                     if find_it:
                         matches_sec = re.finditer(
                             skills_re, text.lower(), re.MULTILINE)
@@ -201,6 +198,44 @@ def get_skills(text):
                                 skill_index += 1
                             rest_name = skill_resume
             return rest_name
+    else:
+        return ""
+
+
+def get_experience(text):
+    matches = re.findall(experience_re, text.lower(), re.MULTILINE)
+    if matches:
+        matches_sec = re.finditer(experience_re, text.lower(), re.MULTILINE)
+        rest_name = ''
+        if matches_sec:
+            match = [m.end(0) for m in matches_sec]
+            index = match[0]
+            skill_index = match[0]
+            while(index < len(text)):
+                rest_name += text[index]
+                index += 1
+            sentences = rest_name.split('\n')
+            for sentence in sentences:
+                if len(sentence) > 4:
+                    find_it, title = find_word_in_sentence(
+                        titles_experience, sentence.lower())
+                    if find_it:
+                        matches_sec = re.finditer(
+                            experience_re, text.lower(), re.MULTILINE)
+                        if matches_sec:
+                            match = [m.start(0) for m in matches_sec]
+                            other_index = match[0]
+                            for i in range(len(match)):
+                                if match[i] > skill_index:
+                                    other_index = match[i]
+                            experience_resume = ''
+                            while(skill_index < other_index):
+                                experience_resume += text[skill_index]
+                                skill_index += 1
+                            rest_name = experience_resume
+            return rest_name
+    else:
+        return ""
 
 
 data = {}
@@ -208,14 +243,17 @@ cvs = []
 for doc in docs:
     cv = {}
     text = textract.process(doc).decode('utf-8')
+    nlp = spacy.load('en_core_web_lg')
+    doct = nlp(text.replace('\n\n', '\n'))
     cv['file'] = doc
     print(doc)
-    cv['name'] = get_name(text)
+    cv['name'] = get_name(text, nlp)
     cv['email'] = get_email(text)
     cv['phone'] = get_phone(text)
-    cv['location'] = get_location(text)
-    cv['language'] = get_language(text)
+    cv['location'] = get_location(text, doct)
+    cv['language'] = get_language(text, doct)
     cv['skills'] = get_skills(text)
+    cv['experience'] = get_experience(text)
     print("==============")
     cvs.append(cv)
 data['data'] = cvs
