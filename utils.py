@@ -76,6 +76,7 @@ def get_name(text, nlp):
                     return ent.text.strip().split('\n')[0]
                 else:
                     return ent.text.strip()
+        return ("no name detected")
 
 
 def get_email(text):
@@ -199,7 +200,7 @@ def get_skills(text):
                             rest_name = skill_resume
             return rest_name
     else:
-        return ""
+        return ("no skill detected")
 
 
 def get_experience(text):
@@ -235,7 +236,7 @@ def get_experience(text):
                             rest_name = experience_resume
             return rest_name
     else:
-        return ""
+        return ("no experience detected")
 
 
 data = {}
