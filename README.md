@@ -12,7 +12,7 @@ Parse:
 ## Install
 
     ### install dependencies
-    sudo apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
+    sudo apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 virtualenv libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
 
     ### create virtual env
     virtualenv --python=python3 --no-site-packages env
