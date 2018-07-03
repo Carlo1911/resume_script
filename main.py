@@ -222,7 +222,6 @@ def main():
     parser.add_argument(
         '-f', '--file', help='The cv file you want to parse', required=True)
     args = vars(parser.parse_args())
-    print(args)
     data = {}
     cv = {}
     text = textract.process(args['file']).decode('utf-8')
@@ -240,7 +239,8 @@ def main():
     print("==============")
     data['data'] = cv
     with open('data.json', 'w') as f:
-        json.dump(data, f, ensure_ascii=False)
+        output = json.dump(data, f, ensure_ascii=False)
+        return output
 
 
 if __name__ == '__main__':
