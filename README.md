@@ -28,4 +28,6 @@ Parse:
     nltk.download()
     ´´´
     ### run the script
+    python main.py -f "test/Adrien CHOROT.docx"
+    or
     python utils.py
