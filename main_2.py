@@ -4,6 +4,7 @@ import json
 import regex as re
 import spacy
 import textract
+from nltk.corpus import words
 
 email_re = r"[\w\.-]+@[\w\.-]+\.\w+"
 phone_regex_plus = r"\+[0-9]{1,}"
@@ -47,7 +48,7 @@ def get_name(text, nlp):
     else:
         doc = nlp(text.replace('\n\n', '\n'))
         for ent in doc.ents:
-            if(ent.label_ == 'PERSON' and re.match(r'\p{L}', ent.text.strip())):
+            if(ent.label_ == 'PERSON' and ent.text.strip() not in words.words() and re.match(r'\p{L}', ent.text.strip())):
                 if '\n' in ent.text:
                     return ent.text.strip().split('\n')[0]
                 else:
@@ -131,14 +132,14 @@ def get_phone(text):
 
 def get_location(text, doc):
     for ent in doc.ents:
-        if(ent.label_ == 'GPE' and '/n' not in ent.text):
+        if(ent.label_ == 'GPE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
     return("no location detected")
 
 
 def get_language(text, doc):
     for ent in doc.ents:
-        if(ent.label_ == 'LANGUAGE' and '/n' not in ent.text):
+        if(ent.label_ == 'LANGUAGE' and ent.text.strip() not in words.words() and '/n' not in ent.text):
             return ent.text
     return("no location detected")
 
