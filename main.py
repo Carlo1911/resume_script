@@ -239,6 +239,8 @@ def main():
     cv['experience'] = get_experience(text)
     print("==============")
     data['data'] = cv
+    print(data)
+    return data
     with open('data.json', 'w') as f:
         output = json.dump(data, f, ensure_ascii=False)
         return output

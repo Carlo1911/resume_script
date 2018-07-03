@@ -8,10 +8,11 @@ if(isset($_POST["submit"])) {
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
 
         $old_path = getcwd();
-        chdir('/home/carlo0071/resume_script');
-        $output = shell_exec('sudo python3.6 main.py -f "test/Adrien CHOROT.docx"');
+        chdir('/var/www/html/resume_script');
+        $output = exec('python3.6 main.py -f "test/Adrien CHOROT.docx"');
         chdir($old_path);
         print_r($output);
+        print_r($target_file);
         echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
         
     } else {
