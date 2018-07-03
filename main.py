@@ -228,8 +228,8 @@ def main():
     text = textract.process(args['file']).decode('utf-8')
     nlp = spacy.load('en_core_web_lg')
     doct = nlp(text.replace('\n\n', '\n'))
-    cv['file'] = doc
-    print(doc)
+    cv['file'] = args['file']
+    print(args['file'])
     cv['name'] = get_name(text, nlp)
     cv['email'] = get_email(text)
     cv['phone'] = get_phone(text)
