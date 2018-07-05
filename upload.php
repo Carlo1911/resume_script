@@ -7,16 +7,27 @@ if(isset($_POST["submit"])) {
 
         $old_path = getcwd();
         chdir('/var/www/html/resume_script');
-        $output = exec('python3.6 main.py -f "/var/www/html/'.$target_file.'"');
+        $scriptPython = exec('python3.6 main.py -f "/var/www/html/'.$target_file.'"');
+        $outputPython = file_get_contents('/var/www/html/resume_script/data.json');
+        chdir('/var/www/html/ResumeParser/ResumeTransducer');
+        $scriptJava = exec('java -cp "bin/*:../GATEFiles/lib/*:../GATEFiles/bin/gate.jar:lib/*" code4goal.antony.resumeparser.ResumeParserProgram "/var/www/html/'.$target_file.'" data.json');
+        $outputJava = file_get_contents('/var/www/html/ResumeParser/ResumeTransducer/data.json');
         chdir($old_path);
-        print_r($output);
+        echo "JAVA";
+        print_r($outputJava);
+        echo "PYTHON";
+        print_r($outputPython);
+
+        $associativeFromPythonParser = json_decode($outputPython, true);
+        $associativeFromJavaParser = json_decode($outputJava, true);
+        $result = array_merge($associativeFromPythonParser, $associativeFromJavaParser);
+
+        print_r($outputPython);
 
     } else {
         print_r($_FILES);
         echo "Sorry, there was an error uploading your file.";
     }
-
-
 }
 
 ?>

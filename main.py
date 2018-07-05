@@ -230,7 +230,6 @@ def main():
     doct = nlp(text.replace('\n\n', '\n'))
     cv['full_text'] = text
     cv['file'] = args['file']
-    print(args['file'])
     cv['name'] = get_name(text, nlp)
     cv['email'] = get_email(text)
     cv['phone'] = get_phone(text)
@@ -240,9 +239,10 @@ def main():
     cv['experience'] = get_experience(text)
     print("==============")
     print(cv)
-    return data
-    with open('data.json', 'w') as f:
-        output = json.dump(data, f, ensure_ascii=False)
+    with open('data.json', 'w+') as f:
+        f.seek(0)                        # <- This is the missing piece
+        f.truncate()
+        output = json.dump(cv, f, ensure_ascii=False)
         return output
 
 
