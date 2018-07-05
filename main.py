@@ -228,6 +228,7 @@ def main():
     text = textract.process(args['file']).decode('utf-8')
     nlp = spacy.load('en_core_web_lg')
     doct = nlp(text.replace('\n\n', '\n'))
+    cv['full_text'] = text
     cv['file'] = args['file']
     print(args['file'])
     cv['name'] = get_name(text, nlp)
@@ -238,8 +239,7 @@ def main():
     cv['skills'] = get_skills(text)
     cv['experience'] = get_experience(text)
     print("==============")
-    data['data'] = cv
-    print(data)
+    print(cv)
     return data
     with open('data.json', 'w') as f:
         output = json.dump(data, f, ensure_ascii=False)
