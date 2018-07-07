@@ -82,7 +82,7 @@ sudo chmod 777 NombreCarpeta
 sudo git clone https://github.com/Carlo1911/resume_script.git
 cd resume_script
 sudo pip3.6 install -r requirements.txt
-python3.6 -m spacy download en_core_web_lg
+sudo python3.6 -m spacy download en_core_web_lg
 ```
 
 #### install java script
