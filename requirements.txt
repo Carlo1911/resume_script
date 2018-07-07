@@ -1,3 +1,2 @@
 textract
 spacy
-nltk

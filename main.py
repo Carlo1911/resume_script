@@ -238,9 +238,8 @@ def main():
     cv['skills'] = get_skills(text)
     cv['experience'] = get_experience(text)
     print("==============")
-    print(cv)
     with open('data.json', 'w+') as f:
-        f.seek(0)                        # <- This is the missing piece
+        f.seek(0)
         f.truncate()
         output = json.dump(cv, f, ensure_ascii=False)
         return output
