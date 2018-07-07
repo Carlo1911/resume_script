@@ -12,9 +12,9 @@ Parse:
 ## Install
 
     ### install dependencies for Ubuntu
-    ```
-    sudo apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 virtualenv libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
-    ```
+        ```
+        sudo apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 virtualenv libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
+        ```
 
     ### install dependencies for centos
     #### install python 3.6
